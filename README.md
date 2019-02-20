@@ -20,5 +20,5 @@ INSTALLED_APPS = [
 Run the mailserver
 
 ```
-./python ./manage.py runmailserver [[address]:port]
+$ python ./manage.py runmailserver [[address]:port]
 ```
