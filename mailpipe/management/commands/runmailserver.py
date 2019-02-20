@@ -39,7 +39,7 @@ class Command(BaseCommand):
 
 
 
-        CustomSMTPServer((self.addr, self.port), None)
+        CustomSMTPServer((self.addr, int(self.port)), None)
         asyncore.loop()
 
 class CustomSMTPServer(smtpd.SMTPServer):
