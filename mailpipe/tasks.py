@@ -1,4 +1,4 @@
-import celery
+#import celery
 import requests
 
 
