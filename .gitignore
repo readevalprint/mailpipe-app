@@ -1,0 +1,54 @@
+*_settings.py
+
+
+*.log
+*.pot
+local_settings.py
+local_urls.py
+*.py[cod]
+db
+celerybeat-schedule
+celerybeat-schedule.*
+
+*.swp
+
+static_root
+media_root
+mailserver/run/*
+mailserver/logs
+*.err
+
+# C extensions
+*.so
+
+# Packages
+*.egg
+*.egg-info
+dist
+build
+eggs
+parts
+bin
+var
+sdist
+develop-eggs
+.installed.cfg
+lib
+lib64
+__pycache__
+
+# Installer logs
+pip-log.txt
+
+# Unit test / coverage reports
+.coverage
+.tox
+nosetests.xml
+
+# Translations
+*.mo
+
+# Mr Developer
+.mr.developer.cfg
+.project
+.pydevproject
