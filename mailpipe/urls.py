@@ -18,7 +18,6 @@ urlpatterns = [
     path('accounts/', EmailAccountList.as_view(), name='email-account-list'),
     path('accounts/<address>/', EmailAccountDetail.as_view(), name='email-account-detail'),
 
-    path('get_token/', obtain_auth_token, name='get_token'),
 ]
 
 
