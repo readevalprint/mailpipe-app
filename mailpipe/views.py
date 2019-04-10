@@ -6,60 +6,42 @@ from django.http import Http404
 from .models import Email, EmailAccount
 from rest_framework import generics
 from rest_framework.response import Response
-from rest_framework import renderers
+from rest_framework import renderers, viewsets
+from rest_framework.decorators import action
+
 from rest_framework import authentication
+from rest_framework.mixins import DestroyModelMixin
 from . import serializers
 
 
-class EmailAccountList(generics.ListCreateAPIView):
-    serializer_class = serializers.EmailAccountIdSerializer
-
-    def get_queryset(self):
-        return EmailAccount.objects.filter(owner=self.request.user)
-
-
-class EmailAccountDetail(generics.RetrieveDestroyAPIView):
+class EmailAccountViewSet(viewsets.ModelViewSet):
     serializer_class = serializers.EmailAccountSerializer
-    lookup_field = 'address'
+    lookup_field = "address"
 
-    def get_queryset(self):
-        return EmailAccount.objects.filter(owner=self.request.user)
+    lookup_value_regex = "[^/]+"
+    queryset = EmailAccount.objects.all()
 
 
-class Attachment(generics.GenericAPIView):
-    def get(self, *args, **kwargs):
-        email_pk = kwargs['email_pk']
-        content_id = kwargs['content_id']
-        name = kwargs.get('name', None)
-        email = get_object_or_404(Email, pk=email_pk, account__owner=self.request.user)
+class EmailViewSet(viewsets.ReadOnlyModelViewSet, DestroyModelMixin):
+    serializer_class = serializers.EmailSerializer
+    queryset = Email.objects.all()
+
+    @action(detail=True, url_path=r"attachments/(?P<content_id>[^/.]+)/(?P<name>.*)")
+    def attachment(self, request):
+        email_pk = self.kwargs["email_address"]
+        content_id = self.kwargs["content_id"]
+        name = self.kwargs.get("name", None)
+        email = self.get_object()
         attachment = email.raw_attachments()[content_id]
-        if not attachment['filename'] == name:
-            return redirect('email-attachment',
-                            email_pk=email_pk,
-                            content_id=content_id,
-                            name=attachment['filename'])
+        if not attachment.get("filename", None) == name:
+            return redirect(
+                "msg-attachment",
+                email_pk=email_pk,
+                content_id=content_id,
+                name=attachment["filename"],
+            )
 
-        response = HttpResponse(attachment['payload'])
-        response['Content-Type'] = attachment['content_type']
-        #response['Content-Disposition'] = 'attachment; filename=%s' % attachment['filename']
+        response = HttpResponse(attachment["payload"])
+        response["Content-Type"] = attachment["content_type"]
+        # response['Content-Disposition'] = 'attachment; filename=%s' % attachment['filename']
         return response
-
-
-class EmailDetail(generics.RetrieveDestroyAPIView):
-    serializer_class = serializers.EmailSerializer
-
-    def get_template_names(self):
-        return ['email-account-email.html']
-
-    def get_queryset(self):
-        return Email.objects.filter(account__owner=self.request.user)
-
-class EmailList(generics.ListAPIView):
-    serializer_class = serializers.EmailSerializer
-
-    def get_template_names(self):
-        return ['email-account-email-list.html']
-
-    def get_queryset(self):
-        return Email.objects.filter(account__owner=self.request.user)
-

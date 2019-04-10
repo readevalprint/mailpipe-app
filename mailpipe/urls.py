@@ -5,19 +5,17 @@ from django.contrib.auth.decorators import login_required
 from django.views.decorators.cache import never_cache
 
 from rest_framework.authtoken.views import obtain_auth_token
-from mailpipe.views import EmailDetail, EmailAccountDetail, EmailAccountList, EmailList, Attachment
+from mailpipe.views import EmailAccountViewSet, EmailViewSet
 from rest_framework.urlpatterns import format_suffix_patterns
 
+from rest_framework_extensions.routers import ExtendedSimpleRouter
+router = ExtendedSimpleRouter()
 
-urlpatterns = [
-    #path(r'^admin/',eadmin.site.urls),
-    path('emails/', EmailList.as_view(), name='email-list'),
-    path('emails/<int:pk>/', EmailDetail.as_view(), name='email-detail'),
-    path('emails/<int:email_pk>/attachments/<content_id>/<name>',
-        never_cache(Attachment.as_view()), name='email-attachment'),
-    path('emailaccounts/', EmailAccountList.as_view(), name='email-account-list'),
-    path('emailaccounts/<address>/', EmailAccountDetail.as_view(), name='email-account-detail'),
+router.register(r"emails", EmailAccountViewSet, base_name="email").register(
+    r"msg",
+    EmailViewSet,
+    base_name="msg",
+    parents_query_lookups=["account"],
+)
 
-]
-
-
+urlpatterns = router.urls
