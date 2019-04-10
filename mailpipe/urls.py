@@ -15,8 +15,8 @@ urlpatterns = [
     path('emails/<int:pk>/', EmailDetail.as_view(), name='email-detail'),
     path('emails/<int:email_pk>/attachments/<content_id>/<name>',
         never_cache(Attachment.as_view()), name='email-attachment'),
-    path('emailaddresses/', EmailAccountList.as_view(), name='email-account-list'),
-    path('emailaddresses/<address>/', EmailAccountDetail.as_view(), name='email-account-detail'),
+    path('emailaccounts/', EmailAccountList.as_view(), name='email-account-list'),
+    path('emailaccounts/<address>/', EmailAccountDetail.as_view(), name='email-account-detail'),
 
 ]
 
