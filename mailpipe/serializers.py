@@ -34,7 +34,7 @@ class EmailSerializer(serializers.HyperlinkedModelSerializer):
         request = self.context.get("request")
         attachments = obj.attachments()
         if request:
-            for v in attachments.values():
+            for v in attachments:
                 v["attachment_url"] = request.build_absolute_uri(v["attachment_url"])
         return attachments
 

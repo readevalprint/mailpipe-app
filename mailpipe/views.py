@@ -27,16 +27,17 @@ class EmailViewSet(viewsets.ReadOnlyModelViewSet, DestroyModelMixin):
     queryset = Email.objects.all()
 
     @action(detail=True, url_path=r"attachments/(?P<content_id>[^/.]+)/(?P<name>.*)")
-    def attachment(self, request):
-        email_pk = self.kwargs["email_address"]
+    def attachment(self, request, *args, parent_lookup_account=None, **kwargs):
+        email_pk = self.kwargs["pk"]
         content_id = self.kwargs["content_id"]
-        name = self.kwargs.get("name", None)
+        name = self.kwargs["name"]
         email = self.get_object()
-        attachment = email.raw_attachments()[content_id]
-        if not attachment.get("filename", None) == name:
+        attachment = email.raw_attachments()[int(content_id)]
+        if not attachment.get("filename", 'null') == name:
             return redirect(
                 "msg-attachment",
-                email_pk=email_pk,
+                parent_lookup_account=parent_lookup_account,
+                pk=emai_.pk,
                 content_id=content_id,
                 name=attachment["filename"],
             )

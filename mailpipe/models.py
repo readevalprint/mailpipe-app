@@ -38,29 +38,30 @@ class Email(models.Model):
             return self.d
         msg = self.parsed_message()
         d = {}
-        attachments = {}
+        attachments = []
         for pl in msg.walk():
             if pl.get_filename():
                 content_id = pl.get("X-Attachment-Id", None) or pl.get(
                     "Content-ID", None
                 )
                 filename = pl.get_filename()
-                attachments[content_id] = {
+                attachments += [{
                     "filename": filename,
-                    "index": len(attachments) + 1,
+                    "index": len(attachments) ,
                     "content_type": pl.get_content_type(),
+                    "content_id": content_id,
                     "attachment_url": (
                         reverse(
                             "msg-attachment",
                             kwargs={
-                                "parent_lookup_account": self.account_id,
+                                "parent_lookup_account": self.account.address,
                                 "pk": self.pk,
                                 "name": filename,
-                                "content_id": content_id,
+                                "content_id": len(attachments),
                             },
                         )
                     ),
-                }
+                }]
             elif pl.get_content_type() in ["text/html", "text/plain"]:
                 raw_payload = pl.get_payload()
                 if pl.get("Content-Transfer-Encoding") == "base64":
@@ -95,13 +96,13 @@ class Email(models.Model):
         return self.payload().get("text/plain", "")
 
     def raw_attachments(self):
+        i=0
         msg = self.parsed_message()
         attachments = {}
         for pl in msg.walk():
             if pl.get_filename():
-                content_id = pl.get("X-Attachment-Id", None) or pl.get(
-                    "Content-ID", None
-                )
+                content_id = i
+                i+=1
                 filename = pl.get_filename()
                 raw_attachment = pl.get_payload()
                 if pl.get("Content-Transfer-Encoding") == "base64":
