@@ -17,6 +17,7 @@ class EmailAccount(models.Model):
     address = models.EmailField(
         unique=True,
         validators=[RegexValidator(regex="^[^+]+$", message="Cannot contain labels")],
+        db_index=True
     )
     callback_url = models.URLField(blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
@@ -63,12 +64,7 @@ class Email(models.Model):
                     ),
                 }]
             elif pl.get_content_type() in ["text/html", "text/plain"]:
-                raw_payload = pl.get_payload()
-                if pl.get("Content-Transfer-Encoding") == "base64":
-                    raw_payload = base64.b64decode(raw_payload.encode("ascii")).decode(
-                        "ascii"
-                    )
-                d[pl.get_content_type()] = raw_payload
+                d[pl.get_content_type()] = pl.get_content()
         d["attachments"] = attachments
         d["to"] = msg["To"]
         d["subject"] = msg["subject"]
@@ -118,7 +114,7 @@ class Email(models.Model):
         return self.payload()["attachments"]
 
     def parsed_message(self):
-        return email.message_from_string(self.message)
+        return email.message_from_string(self.message, policy=email.policy.default)
 
     @classmethod
     def create(cls, address, message):
